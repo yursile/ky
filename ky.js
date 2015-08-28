@@ -1,4 +1,4 @@
-(function(){
+	(function(){
 
 	function ky(selector){
 		return new ky.prototype.init(selector);
@@ -53,43 +53,125 @@
 
 	ky.prototype.dbClick = function(target,fn){
 
-		target.addEventListener("touchstart",function(event){
-			var first,last; 
-			event.stopPropagation();
-			event.preventDefault();
+		var i = 0;
+		var len = this.length;
+		for(;i<len;i++){
+			target = this[i];
+			target.addEventListener("touchstart",function(event){
+				var first,last; 
+				event.stopPropagation();
+				event.preventDefault();
 
-			target.addEventListener("touchend",function(){
-				first = new Date().getTime();
-				
-				target.addEventListener("touchstart",function(event){
-					event.stopPropagation();
-					event.preventDefault();
-					end = new Date().getTime();
+				target.addEventListener("touchend",function(){
+					first = new Date().getTime();
 
-					if(end - first<500){
+					target.addEventListener("touchstart",function(event){
+						event.stopPropagation();
+						event.preventDefault();
+						end = new Date().getTime();
 
-						target.addEventListener("touchend",function(event){
+						if(end - first<500){
+
+							target.addEventListener("touchend",function(event){
+								fn(event);
+								target.removeEventListener("touchend",arguments.callee,false);
+							},false);
+
 							fn(event);
-							target.removeEventListener("touchend",arguments.callee,false);
-						},false);
-
-						fn(event);
-					}
-					target.removeEventListener("touchstart",arguments.callee,false);
+						}
+						target.removeEventListener("touchstart",arguments.callee,false);
+					},false);
 				},false);
+
 			},false);
-			
-		},false);
+		}		
 	};
 
 
 	ky.prototype.html = function(str){
 		var i = 0;
 		var len = this.length;
+		if(!str.trim()){
+			
+			target = this[0];
+			return target.innerHTML;
+				
+		}else{
+			for(;i<len;i++){
+				target = this[i];
+				target.innerHTML = str
+			}	
+		}
+			
+	}
+
+	ky.Callbacks = function(){
+		this.fns = [];
+	};
+
+	ky.Callbacks.prototype = {
+		constructor:ky.Callbacks,
+
+		add:function(fn){
+			this.fns.push(fn);
+		},
+		fire:function(arg){
+			var i = 0;
+			var len = this.fns.length;
+			for(;i<len;i++){
+				this.fns[i](arg);
+			}
+		}
+	};
+
+	ky.prototype.swiper = function(direction,fn){
+		var i = 0;
+		var len = this.length;
 		for(;i<len;i++){
 			target = this[i];
-			target.innerHTML = str
-		}	
+			target.addEventListener("touchstart",function(event){
+				event.stopPropagation();
+				event.preventDefault();
+				var currentDirection = [];
+				var touch = event.targetTouches[0];
+				var ox = touch.clientX;
+				var oy = touch.clientY;
+				console.log("x:"+ox+"  y:"+oy);
+
+				target.addEventListener("touchend",function(event){
+					event.stopPropagation();
+					event.preventDefault();
+
+					var touch2 = event.changedTouches[0];
+					var dx = touch2.clientX;
+					var dy = touch2.clientY;
+					console.log("x:"+dx+"  y:"+dy);
+					if(dx-ox>3){
+						currentDirection.push("right");
+					}else if(dx-ox>3){
+						currentDirection.push("left");
+					}
+					if(dy-oy>3){
+						currentDirection.push("down");
+					}else if(dy-oy<3){
+						currentDirection.push("up");
+					}
+
+
+					for(var i = 0;i<currentDirection.length;i++){
+						if(currentDirection[i] == direction){
+							fn();
+						}
+					}
+
+
+					//last
+
+					target.removeEventListener("touchend",arguments.callee,false);
+				});
+
+			},false);
+		}		
 	}
 
 	window.ky = ky;
