@@ -173,6 +173,32 @@
 			},false);
 		}		
 	}
+	
+	function jsonp(option){
+		var script = document.createElement("script");
+		option.callback=option.callback||rdfn();
+		script.src = option.url+"?"+obj2arg(option.data)+"&callback="+option.callback;
+		window[option.callback] = function(data){
+			option.success(data);
+			window[option.callback] = null;
+		}
+		setTimeout(function(){
+			document.body.appendChild(script)
+		},0);
+	}
+
+	function obj2arg(option){
+		var args = "";
+		for(var i in option){
+			args += i+"="+option[i]+"&";
+		}
+		return args.slice(0,this.length-1);
+	}
+
+	function rdfn(){
+		return "jsonp"+Math.ceil(Math.random()*100000);
+	}
+	ky.jsonp = jsonp;
 
 	window.ky = ky;
 })();
