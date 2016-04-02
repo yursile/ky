@@ -181,6 +181,7 @@
 		window[option.callback] = function(data){
 			option.success(data);
 			window[option.callback] = null;
+			document.body.removeChild(script);
 		}
 		setTimeout(function(){
 			document.body.appendChild(script)
